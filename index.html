@@ -15,7 +15,13 @@ button{border:0;border-radius:16px;padding:15px 20px;font-size:16px;font-weight:
 .option{display:block;width:100%;text-align:left;background:#fff;border:2px solid #e7e7ef;margin:12px 0;padding:17px 18px;border-radius:18px;font-weight:700;line-height:1.5}.option:hover,.selected{border-color:#6c5ce7;background:#f5f2ff}.small{font-size:14px;color:#777}.rank{font-size:14px;color:#6558c9;font-weight:900}.type{font-size:29px;font-weight:900;margin:6px 0}.footer{text-align:center;color:#999;font-size:12px;margin-top:18px}
 </style>
 </head>
-<body><div class="wrap"><div class="card" id="app"></div><div class="footer">숏폼 몰입 탐정 · 수업용 자기탐구 도구</div></div>
+
+<body>
+<div class="wrap">
+  <div class="card" id="app"></div>
+  <div class="footer">숏폼 몰입 탐정 · 수업용 자기탐구 도구</div>
+</div>
+
 <script>
 const Q=[
 ["즉시성","숏폼을 넘기다가 첫 장면부터 재미있어 보이는 영상이 나타났다. 나는?",["멈춰서 끝까지 본다.","조금 보고 재미있으면 끝까지 본다.","관심 있는 주제가 아니면 넘긴다."]],
@@ -31,6 +37,7 @@ const Q=[
 ["연속성","“이번 영상까지만 보고 끄자”고 했는데 다음 영상이 궁금해졌다. 나는?",["궁금하니까 하나 더 본다.","잠깐 고민하고 볼지 말지 결정한다.","그래도 끈다."]],
 ["개인화","친구와 같은 앱을 사용하는데 나에게만 내가 좋아하는 영상이 추천된다면 나는?",["내 취향을 알아주는 것 같아서 더 재미있다.","추천 영상이 마음에 들면 본다.","추천보다 내가 직접 찾는 게 좋다."]]
 ];
+
 const TYPES={
 "즉시성":["⚡ 번개 발견형","재미있는 순간을 발견하면 바로 시선 고정!"],
 "시각성":["🎬 장면 수집가형","눈과 귀를 사로잡는 장면을 그냥 지나치지 못함!"],
@@ -39,13 +46,110 @@ const TYPES={
 "연속성":["🚂 다음칸 승객형","하나의 영상이 끝나면 다음 이야기가 궁금해짐!"],
 "개인화":["🎯 취향 저격형","내 취향을 찾아오는 영상은 그냥 지나치기 어렵지!"]
 };
+
 let order=[...Array(Q.length).keys()],pos=0,ans=Array(Q.length).fill(null);
 order.sort(()=>Math.random()-.5);
-function start(){pos=0;show()}
-function show(){let i=order[pos],q=Q[i];app.innerHTML=`<div class="progress"><span>탐정 질문 ${pos+1} / 12</span><span>${Math.round((pos+1)/12*100)}%</span></div><div class="bar"><div class="fill" style="width:${(pos+1)/12*100}%"></div></div><div class="small">나의 숏폼 경험을 떠올려 보세요.</div><h2>${q[1]}</h2>${q[2].map((x,k)=>`<button class="option ${ans[i]===k?"selected":""}" onclick="pick(${k})">${String.fromCharCode(65+k)}. ${x}</button>`).join("")}${ans[i]!==null?'<button class="primary" onclick="next()">다음 질문 →</button>':""}`}
-function pick(v){ans[order[pos]]=v;setTimeout(()=>{if(pos<11){pos++;show()}else result()},120)}
-function next(){if(pos<11){pos++;show()}else result()}
-function result(){let s={};Q.forEach((q,i)=>s[q[0]]=(s[q[0]]||0)+(2-ans[i]));let r=Object.entries(s).sort((a,b)=>b[1]-a[1]);let a=TYPES[r[0][0]],b=TYPES[r[1][0]];app.innerHTML=`<span class="badge">🕵️ 분석 완료!</span><h1>당신에게 강하게 나타난<br>숏폼 유형!</h1><div class="result"><div class="rank">🥇 1순위</div><div class="type">${a[0]}</div><div>${a[1]}</div></div><div class="result"><div class="rank">🥈 2순위</div><div class="type">${b[0]}</div><div>${b[1]}</div></div><p class="small">친구와 결과를 비교해 보세요.</p><button class="share" onclick="share()">📣 친구들과 공유하기</button><button class="secondary" onclick="location.reload()">처음부터 다시 하기</button>`}
+
+function start(){
+  pos=0;
+  show();
+}
+
+function show(){
+  let i=order[pos],q=Q[i];
+
+  app.innerHTML=`
+    <div class="progress">
+      <span>탐정 질문 ${pos+1} / 12</span>
+      <span>${Math.round((pos+1)/12*100)}%</span>
+    </div>
+    <div class="bar">
+      <div class="fill" style="width:${(pos+1)/12*100}%"></div>
+    </div>
+    <div class="small">나의 숏폼 경험을 떠올려 보세요.</div>
+    <h2>${q[1]}</h2>
+    ${q[2].map((x,k)=>`
+      <button class="option ${ans[i]===k?"selected":""}" onclick="pick(${k})">
+        ${String.fromCharCode(65+k)}. ${x}
+      </button>
+    `).join("")}
+    ${ans[i]!==null?'<button class="primary" onclick="next()">다음 질문 →</button>':""}
+  `;
+}
+
+function pick(v){
+  ans[order[pos]]=v;
+  setTimeout(()=>{
+    if(pos<11){
+      pos++;
+      show();
+    }else{
+      result();
+    }
+  },120);
+}
+
+function next(){
+  if(pos<11){
+    pos++;
+    show();
+  }else{
+    result();
+  }
+}
+
+function result(){
+  let s={};
+  Q.forEach((q,i)=>s[q[0]]=(s[q[0]]||0)+(2-ans[i]));
+
+  let r=Object.entries(s).sort((a,b)=>b[1]-a[1]);
+  let a=TYPES[r[0][0]],b=TYPES[r[1][0]];
+
+  app.innerHTML=`
+    <span class="badge">🕵️ 분석 완료!</span>
+    <h1>당신에게 강하게 나타난<br>숏폼 유형!</h1>
+
+    <div class="result">
+      <div class="rank">🥇 1순위</div>
+      <div class="type">${a[0]}</div>
+      <div>${a[1]}</div>
+    </div>
+
+    <div class="result">
+      <div class="rank">🥈 2순위</div>
+      <div class="type">${b[0]}</div>
+      <div>${b[1]}</div>
+    </div>
+
+    <p class="small">친구와 결과를 비교해 보세요.</p>
+
+    <button class="share" onclick="share()">📣 친구들과 공유하기</button>
+    <button class="secondary" onclick="location.reload()">처음부터 다시 하기</button>
+  `;
+}
+
 function share(){
   window.location.href="https://www.menti.com/almiw8myivza?source=voteCode";
 }
+
+app.innerHTML=`
+  <span class="badge">🔍 숏폼 몰입 탐정</span>
+  <h1>나는 왜 숏폼을<br>계속 보게 될까?</h1>
+
+  <div class="goal">
+    🎯 탐정의 목표<br>
+    <span style="font-weight:600">
+      나의 숏폼 습관을 살펴보고, 숏폼이 왜 재미있는지 알아보자!
+    </span>
+  </div>
+
+  <p>
+    평소 숏폼을 볼 때의 내 모습을 떠올리며 답해보세요.
+    정답은 없어요. 가장 나다운 답을 골라주세요.
+  </p>
+
+  <button class="primary" onclick="start()">탐정 시작하기 🔎</button>
+`;
+</script>
+</body>
+</html>
